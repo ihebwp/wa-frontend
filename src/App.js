@@ -1,7 +1,6 @@
 import { lazy, Suspense } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import NavBar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import Loader from "./components/Loader/Loader";
 import { ToastContainer } from "react-toastify";
@@ -9,6 +8,8 @@ import "react-toastify/dist/ReactToastify.css";
 import Login from "./components/login/login";
 import Signup from "./components/signup/signup";
 import UsersList from "./pages/UsersList";
+const Dashboard = lazy(() => import("./pages/Dashboard"));  // Importing the .jsx file
+const Commands = lazy(() => import("./pages/Commands"));
 const Home = lazy(() => import("./pages/Home"));
 const Shop = lazy(() => import("./pages/Shop"));
 const Cart = lazy(() => import("./pages/Cart"));
@@ -37,6 +38,9 @@ function App() {
           <Route path="/shop/:id" element={<Product />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/users" element={<UsersList />} />
+          <Route path="/dashboard" element={<Dashboard />} /> {/* Added Dashboard route */}
+          <Route path="/commands" element={<Commands />} /> {/* Nouvelle route des commandes */}
+
         </Routes>
         <Footer />
       </Router>

@@ -23,6 +23,8 @@ import { IoMoon } from "react-icons/io5";
 import GroupIcon from "@mui/icons-material/Group";
 import LocalMallIcon from "@mui/icons-material/LocalMall";
 import logoC from "../../src/Images/1.png"
+import DashboardIcon from "@mui/icons-material/Dashboard"; // Import Dashboard Icon
+
 export default function Appbar() {
   const { cartList } = useSelector((state) => state.cart);
   const { user } = useSelector((state) => state.auth);
@@ -311,6 +313,13 @@ export default function Appbar() {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar style={{ backgroundColor: darkMode ? "#0f3460" : "#fff" }}>
         <Toolbar>
+           {/* Dashboard Logo with Link */}
+           
+        <Link to="/dashboard" style={{ textDecoration: "none", color: "inherit" }}>
+          <IconButton title="Dashboard" size="large" color="inherit">
+            <DashboardIcon style={{ color: darkMode ? "#fff" : "#0f3460" }} />
+          </IconButton>
+        </Link>
           <Typography
             variant="h6"
             noWrap

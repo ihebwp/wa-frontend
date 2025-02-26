@@ -1,9 +1,12 @@
-import React, { useState } from "react";
-import { TextField, Modal, Button, Box, Typography, MenuItem, FormControl, Select, FormHelperText } from "@mui/material";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useState, useContext } from "react";
+import { 
+  TextField, Modal, Button, Box, Typography, MenuItem, 
+  FormControl, Select, FormHelperText 
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { addProduct } from "../../services/productService.js";
 import { DarkModeContext } from "../../contexte/index.jsx";
+import axios from "axios";  
 
 const style = {
   position: "absolute",
@@ -17,6 +20,11 @@ const style = {
   p: 5,
 };
 
+const allowedCategories = [
+  "Computing", "Phones", "Storage", "Printing", "Multimedia", 
+  "Appliances", "Security", "Office",
+];
+
 const AddProduct = () => {
   const [open, setOpen] = useState(false);
   const [productData, setProductData] = useState({
@@ -24,13 +32,14 @@ const AddProduct = () => {
     price: "",
     category: "",
     description: "",
+    discount: "",
+    newProduct: "",
   });
-  const [imgUrl, setimgUrl] = useState();
-  const dispatch = useDispatch();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [categories, setCategories] = useState([]); 
   const navigate = useNavigate();
-  const [darkMode, setDarkMode] = React.useContext(DarkModeContext)
+  const [darkMode] = useContext(DarkModeContext);
   const [loading, setLoading] = useState(false);
-
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -42,27 +51,22 @@ const AddProduct = () => {
     }));
   };
 
+  const handleCategoryChange = (event) => {
+    setProductData((prevState) => ({
+      ...prevState,
+      category: event.target.value,
+    }));
+  };
+
   const onFileChange = (e) => {
-    setimgUrl(e.target.files[0]);
     const file = e.target.files[0];
-    const reader = new FileReader();
-
-
-    reader.onloadstart = () => setLoading(true);
-    reader.onload = (e) => {
-      const content = e.target.result;
-
-      setLoading(false);
-      // You can process the file content here, such as parsing it for calculator input
-    };
-
-    reader.readAsText(file);
-
+    setSelectedFile(file);
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
-  
+    console.log("Form submitted with data: ", productData);
+
     try {
       const formData = new FormData();
       formData.append("productName", productData.productName);
@@ -71,14 +75,31 @@ const AddProduct = () => {
       formData.append("description", productData.description);
       formData.append("discount", productData.discount);
       formData.append("newProduct", productData.newProduct);
-      formData.append("imgUrl", imgUrl);
-      await addProduct(formData);
 
+      if (selectedFile) {
+        formData.append("imgUrl", selectedFile);
+      }
+
+      await addProduct(formData);
+      handleClose();
       navigate("/");
     } catch (error) {
       console.error("Error adding product:", error);
     }
   };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get("/api/categories");
+        setCategories(response.data);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   return (
     <div>
@@ -86,16 +107,15 @@ const AddProduct = () => {
         color="info"
         variant="contained"
         onClick={handleOpen}
-        style={{ marginLeft: "50px",backgroundColor:darkMode ? '#0f3460' : '#fff',color:darkMode ? '#fff' : 'black' }}
+        style={{
+          marginLeft: "50px",
+          backgroundColor: darkMode ? "#0f3460" : "#fff",
+          color: darkMode ? "#fff" : "black",
+        }}
       >
         Add product
       </Button>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
+      <Modal open={open} onClose={handleClose}>
         <Box sx={style}>
           <Typography sx={{ mb: "25px", fontWeight: "bold" }}>
             Add new product
@@ -103,8 +123,7 @@ const AddProduct = () => {
           <form onSubmit={onSubmit} method="post" encType="multipart/form-data">
             <Box sx={{ mb: "15px" }}>
               <TextField
-                sx={{ width: "100%", p: "5px" }}
-                id="outlined-basic"
+                fullWidth
                 name="productName"
                 label="Product Name"
                 variant="outlined"
@@ -114,8 +133,7 @@ const AddProduct = () => {
             </Box>
             <Box sx={{ mb: "15px" }}>
               <TextField
-                sx={{ width: "100%", p: "5px" }}
-                id="outlined-basic"
+                fullWidth
                 name="price"
                 label="Price"
                 variant="outlined"
@@ -124,20 +142,28 @@ const AddProduct = () => {
               />
             </Box>
             <Box sx={{ mb: "15px" }}>
-              <TextField
-                sx={{ width: "100%", p: "5px" }}
-                id="outlined-basic"
-                name="category"
-                label="Category"
-                variant="outlined"
-                onChange={onChange}
-                required
-              />
+              <FormControl fullWidth required>
+                <Select
+                  name="category"
+                  value={productData.category}
+                  onChange={handleCategoryChange}
+                  displayEmpty
+                >
+                  <MenuItem value="">
+                    <em>Choose a Category</em>
+                  </MenuItem>
+                  {allowedCategories.map((category) => (
+                    <MenuItem key={category} value={category}>
+                      {category}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>Category</FormHelperText>
+              </FormControl>
             </Box>
             <Box sx={{ mb: "15px" }}>
               <TextField
-                sx={{ width: "100%", p: "5px" }}
-                id="outlined-basic"
+                fullWidth
                 name="description"
                 label="Description"
                 variant="outlined"
@@ -145,53 +171,28 @@ const AddProduct = () => {
                 required
               />
             </Box>
-          
             <Box sx={{ mb: "15px" }}>
               <TextField
-                sx={{ width: "100%", p: "5px" }}
-                id="outlined-basic"
+                fullWidth
                 name="discount"
-                label="discount"
+                label="Discount"
                 variant="outlined"
                 onChange={onChange}
               />
             </Box>
             <Box sx={{ mb: "15px" }}>
               <TextField
-                sx={{ width: "100%", p: "5px" }}
-                id="outlined-basic"
+                fullWidth
                 name="newProduct"
-                label="newProduct"
+                label="New Product"
                 variant="outlined"
                 onChange={onChange}
               />
-                {/* <FormControl sx={{ p: '5px', minWidth: '100%' }}>
-        <Select
-         
-          onChange={onChange}
-          name="newProduct"
-          displayEmpty
-          inputProps={{ 'aria-label': 'New product' }}
-        >
-          <MenuItem value="">
-            <em>None</em>
-          </MenuItem>
-          <MenuItem value={10}>Yes</MenuItem>
-          <MenuItem value={20}>No</MenuItem>
-        </Select>
-        <FormHelperText>New product</FormHelperText>
-      </FormControl> */}
             </Box>
-          
-            <input
-              sx={{ width: "100%" }}
-              type="file"
-              name="imgUrl"
-              label="Image"
-              variant="outlined"
-              onChange={onFileChange}
-            />
-             {loading && <div>Loading...</div>}
+            <Box sx={{ mb: "15px" }}>
+              <input type="file" name="imgUrl" onChange={onFileChange} />
+            </Box>
+            {loading && <div>Loading...</div>}
             <Box sx={{ textAlign: "end" }}>
               <Button
                 color="error"
@@ -201,12 +202,7 @@ const AddProduct = () => {
               >
                 Cancel
               </Button>
-              <Button
-                color="success"
-                variant="contained"
-                type="submit"
-                sx={{ width: "85px" }}
-              >
+              <Button color="success" variant="contained" type="submit" sx={{ width: "85px" }}>
                 Save
               </Button>
             </Box>

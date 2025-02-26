@@ -71,7 +71,7 @@ function getProductById(id) {
   }, null, null, [[0, 7]]);
 }
 
-function addProduct(productData) {
+function addProduct(formData) {
   var response;
   return regeneratorRuntime.async(function addProduct$(_context3) {
     while (1) {
@@ -79,7 +79,12 @@ function addProduct(productData) {
         case 0:
           _context3.prev = 0;
           _context3.next = 3;
-          return regeneratorRuntime.awrap(_axios["default"].post(API_URL + '/product', productData));
+          return regeneratorRuntime.awrap(_axios["default"].post(API_URL + '/product', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data' // Set content type for file upload
+
+            }
+          }));
 
         case 3:
           response = _context3.sent;

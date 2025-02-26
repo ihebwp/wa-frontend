@@ -24,10 +24,13 @@ async function getProductById(id) {
   }
 }
 
-async function addProduct(productData) {
-
+async function addProduct(formData) {
   try {
-    const response = await axios.post(API_URL+'/product', productData);
+    const response = await axios.post(API_URL + '/product', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data', // Set content type for file upload
+      },
+    });
     return response.data;
   } catch (error) {
     console.error('Error adding product:', error);
@@ -37,13 +40,15 @@ async function addProduct(productData) {
 
 async function updateProduct(id, productData) {
   try {
-    const response = await axios.put(API_URL+`/product/${id}`, productData);
+    const response = await axios.put(API_URL + `/product/${id}`, productData);
     return response.data;
   } catch (error) {
     console.error(`Error updating product with id ${id}:`, error);
     throw error;
   }
 }
+
+
 
 async function deleteProduct(id) {
   try {

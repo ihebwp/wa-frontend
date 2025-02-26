@@ -196,4 +196,9 @@
     gap: 5px;
   }
   
+  
+}
+
+.dashboard-text-link:hover {
+  color: #f0f0f0; /* Hover effect */
 }

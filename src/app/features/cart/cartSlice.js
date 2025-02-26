@@ -9,8 +9,6 @@ const initialState = {
   cartList: storedCartList,
 };
 
-
-
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -54,6 +52,10 @@ export const cartSlice = createSlice({
         (item) => item._id !== productToDelete._id
       );
     },
+    // ✅ Nouvelle action pour vider le panier
+    clearCart: (state) => {
+      state.cartList = [];
+    },
   },
 });
 
@@ -66,6 +68,7 @@ export const cartMiddleware = (store) => (next) => (action) => {
   return result;
 };
 
-export const { addToCart, decreaseQty, deleteProduct } = cartSlice.actions;
+// ✅ Ajout de clearCart à l'exportation
+export const { addToCart, decreaseQty, deleteProduct, clearCart } = cartSlice.actions;
 
 export default cartSlice.reducer;

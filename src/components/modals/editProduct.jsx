@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { TextField, Modal, Button, Box, Typography } from "@mui/material";
-import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { updateProduct } from "../../services/productService.js";
 
 const EditProductModal = ({ open, handleClose, product }) => {
   const [editedProductData, setEditedProductData] = useState({ ...product });
   const [imgUrl, setImgUrl] = useState(product.imgUrl);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const onChange = (e) => {
@@ -34,9 +32,12 @@ const EditProductModal = ({ open, handleClose, product }) => {
       formData.append("newProduct", editedProductData.newProduct);
       formData.append("imgUrl", imgUrl);
 
+      console.log("Form Data: ", formData); // Log the FormData for debugging
+
       await updateProduct(product._id, formData);
 
       navigate("/");
+
     } catch (error) {
       console.error("Error editing product:", error);
     }

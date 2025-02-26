@@ -13,7 +13,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import Appbar from "./../components/Appbar";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import deleteUser from "../services/authService.js"
+import { useNavigate } from "react-router-dom";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -38,20 +38,43 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 const UsersList = () => {
   const [users, setUsers] = useState([]);
   const dispatch = useDispatch(); // Moved useDispatch inside functional component
+  const navigate = useNavigate(); // Navigate hook for redirection
 
   useEffect(() => {
-    authService.getAllUsers().then((res) => {
-      if (res) {
-        console.log("users liste", res);
-        setUsers(res);
-      }
-    });
-  }, []);
+    const data = JSON.parse(localStorage.getItem("user")); // Assuming this is the entire object with token and user properties
+    const user = data?.user; // Access the user object within the data
+    console.log("User from localStorage in UsersList:", user); // Debugging log
+    
+    // Ensure the user exists and the role is exactly 'admin'
+    if (!user || user.role.trim() !== "admin") {
+      console.log("Not an admin or no user found, redirecting..."); // Debugging log
+      navigate("/login");
+    } else {
+      // Fetch the users list if the user is admin
+      authService.getAllUsers().then((res) => {
+        console.log("Users fetched in UsersList:", res); // Debugging log
+        if (res) {
+          setUsers(res);
+        }
+      }).catch((err) => {
+        console.error("Error fetching users:", err);
+      });
+    }
+  }, [navigate]);
+  
 
-  const userDelete = () => {
-    dispatch(deleteUser());
-    toast.success("user has been deleted");
+  const userDelete = (id) => {
+    authService.deleteUser(id)
+      .then(() => {
+        toast.success("User has been deleted");
+        setUsers((prevUsers) => prevUsers.filter((user) => user._id !== id)); // ✅ Correct state update
+      })
+      .catch((err) => {
+        console.error("Error deleting user:", err);
+        toast.error("Failed to delete user");
+      });
   };
+  
 
   return (
     <>
@@ -80,9 +103,10 @@ const UsersList = () => {
                     <StyledTableCell align="right">{u.email}</StyledTableCell>
                     <StyledTableCell align="right">{u.role}</StyledTableCell>
                     <StyledTableCell align="right">
-                      <Button variant="outlined" startIcon={<DeleteIcon />} onClick={userDelete}>
-                        Delete
-                      </Button>
+                    <Button variant="outlined" startIcon={<DeleteIcon />} onClick={() => userDelete(u._id)}>
+                       Delete
+                    </Button>
+
                     </StyledTableCell>
                   </StyledTableRow>
                 ))}

@@ -50,7 +50,7 @@ const Home = () => {
             color={darkMode ? "#1c1c1c" : "white"}
             productItems={prod}
           />
-          <Section
+          {/* <Section
             title="Nouveaux Arrivés"
             bgColor={darkMode ? "#f6f9fc" : "#1c1c1c"}
             color={darkMode ? "#1c1c1c" : "white"}
@@ -61,7 +61,7 @@ const Home = () => {
             bgColor={darkMode ? "#f6f9fc" : "#1c1c1c"}
             color={darkMode ? "#1c1c1c" : "white"}
             productItems={bestSales}
-          />
+          /> */}
      
     </Fragment>
   );
